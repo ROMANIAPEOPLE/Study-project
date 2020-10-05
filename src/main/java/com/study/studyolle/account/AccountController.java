@@ -2,7 +2,9 @@ package com.study.studyolle.account;
 
 import com.study.studyolle.domain.Account;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.jni.Local;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
@@ -42,7 +44,8 @@ public class AccountController {
             return "account/sign-up";
         }
 
-        accountService.processNewAccount(signUpForm);
+        Account account = accountService.processNewAccount(signUpForm);
+        accountService.login(account);
 
 
 //        대체 가능
@@ -54,21 +57,30 @@ public class AccountController {
         return "redirect:/";
     }
 
+    //이메일 인증
+    @Transactional
     @GetMapping("/check-email-token")
     public String checkEmailToken(String token, String email, Model model){
         Account account = accountRepository.findByEmail(email);
+        System.out.println("email = " +  account.getEmail());
+        System.out.println("nickname = " + account.getNickname());
         if( account == null) {
             model.addAttribute("error", "wrong.email");
             return "account/checked-email";
         }
 
-        if(!account.getEmailCheckToken().equals(token)){
+        if(!account.isValidToken(token)){
             model.addAttribute("error", "wrong.token");
             return "account/checked-email";
           }
 
-        account.setEmailVerified(true);
+//        account.completeSignUp();
+
         account.setJoinedAt(LocalDateTime.now());
+        account.setEmailVerified(true);
+
+        accountService.login(account);
+
         model.addAttribute("numberOfUser" ,accountRepository.count());
         model.addAttribute("nickname", account.getNickname());
 

@@ -10,14 +10,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Transactional
 @SpringBootTest
 @AutoConfigureMockMvc
 class AccountControllerTest {
@@ -27,6 +30,41 @@ class AccountControllerTest {
 
     @Autowired private AccountRepository accountRepository;
     @Autowired private MockMvc mockMvc;
+
+
+    @DisplayName("인증 메일 확인 - 오류")
+    @Test
+    void checkEMailToken_with_wrong_input() throws Exception {
+        mockMvc.perform(get("/check-email-token")
+                .param("token", "sadiasdasd")
+                .param("email", "email.com"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("error"));
+    }
+    @Transactional
+    @DisplayName("인증 메일 확인 - 정상" )
+    @Test
+    void checkEmailToken_with_success() throws  Exception{
+        Account account = Account.builder()
+                .email("jungkh405@naver.com")
+                .nickname("김문섭섭")
+                .password("123456789")
+                .build();
+
+
+        Account newAccount = accountRepository.save(account);
+        newAccount.generateEmailCheckToken();
+
+        mockMvc.perform(get("/check-email-token")
+                .param("token", newAccount.getEmailCheckToken())
+                .param("email", newAccount.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeDoesNotExist("error"))
+                .andExpect(model().attributeExists("numberOfUser"))
+                .andExpect(model().attributeExists("nickname"))
+                .andExpect(authenticated());
+    }
+
 
     @DisplayName("회원가입 화면 보이는지 테스트")
     @Test
