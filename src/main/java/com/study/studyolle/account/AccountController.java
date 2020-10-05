@@ -24,6 +24,7 @@ public class AccountController {
     private final SignUpFormValidator signUpFormValidator;
     private final AccountService accountService;
     private final AccountRepository accountRepository;
+
     //signUpForm이라는 데이터를 받을때 함께 실행된다.
     @InitBinder("signUpForm")
     public void initBinder(WebDataBinder webDataBinder){
@@ -53,6 +54,31 @@ public class AccountController {
 //        if(errors.hasErrors()) {
 //            return "account/sign-up";
 //        }
+
+        return "redirect:/";
+    }
+
+    //이메일 재인증
+    @GetMapping("/check-email")
+    public String emailReSendPage(@CurrentUser Account account, Model model){
+
+
+        model.addAttribute("email",account.getEmail());
+        return "account/check-email";
+
+    }
+
+    @GetMapping("/resend-confirm-email")
+    public String emailResend(@CurrentUser Account account, Model model){
+        //토큰을 재생성하는것이 아니라, 기존의 토큰으로 다시 이메일 전송
+        System.out.println("이메일 재전송");
+
+        if(!account.canSendConfirmEmail()){
+            model.addAttribute("error", "인증 메일 발송은 1시간에 1회만 가능합니다.");
+            model.addAttribute("email",account.getEmail());
+            return "account/check-email";
+        }
+        accountService.sendSignUpEmail(account);
 
         return "redirect:/";
     }

@@ -1,6 +1,7 @@
 package com.study.studyolle.domain;
 
 import lombok.*;
+import org.apache.tomcat.jni.Local;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
@@ -31,6 +32,7 @@ public class Account {
     private boolean emailVerified;
 
     private String emailCheckToken;
+    private LocalDateTime emailCheckTokenGeneratedAt;
 
 
     //가입날짜
@@ -58,15 +60,24 @@ public class Account {
     //임의의 토큰 생성
     public void generateEmailCheckToken() {
         this.emailCheckToken = UUID.randomUUID().toString();
+        this.emailCheckTokenGeneratedAt = LocalDateTime.now();
     }
 
+    //미사용
     @Transactional
     public void completeSignUp() {
         this.emailVerified = true;
         this.joinedAt = LocalDateTime.now();
     }
 
+    //토큰 비교
+
     public boolean isValidToken(String token) {
         return this.emailCheckToken.equals(token);
     }
+
+    public boolean canSendConfirmEmail(){
+        return this.emailCheckTokenGeneratedAt.isBefore(LocalDateTime.now().minusHours(1));
+    }
+
 }
