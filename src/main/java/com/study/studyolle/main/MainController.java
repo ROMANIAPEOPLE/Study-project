@@ -14,8 +14,11 @@ public class MainController {
         if(account != null){
             model.addAttribute(account);
         }
-
         return "index";
+    }
 
+    @GetMapping("/login")
+    public String login(){
+        return "login";
     }
 }
