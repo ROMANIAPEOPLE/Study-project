@@ -10,6 +10,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
@@ -84,7 +85,6 @@ public class AccountController {
     }
 
     //이메일 인증
-    @Transactional
     @GetMapping("/check-email-token")
     public String checkEmailToken(String token, String email, Model model){
         Account account = accountRepository.findByEmail(email);
@@ -100,17 +100,27 @@ public class AccountController {
             return "account/checked-email";
           }
 
-//        account.completeSignUp();
 
-        account.setJoinedAt(LocalDateTime.now());
-        account.setEmailVerified(true);
+        accountService.completeSignUp(account);
 
-        accountService.login(account);
 
         model.addAttribute("numberOfUser" ,accountRepository.count());
         model.addAttribute("nickname", account.getNickname());
 
         return "account/checked-email";
+    }
+
+    @GetMapping("/profile/{nickname}")
+    public String viewProfile(@PathVariable String nickname, Model model, @CurrentUser Account account){
+        Account byNickname = accountRepository.findByNickname(nickname);
+        if(byNickname == null) {
+            throw new IllegalArgumentException(nickname + "에 해당하는 사용자가 없습니다.");
+        }
+
+        model.addAttribute(byNickname);
+        // model.addAttribute("account",byNickname") 와 동일함.
+        model.addAttribute("isOwner", byNickname.equals(account));
+        return "account/profile";
     }
 
 

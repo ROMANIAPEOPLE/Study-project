@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
 import java.util.List;
-
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class AccountService implements UserDetailsService {
@@ -57,6 +57,7 @@ public class AccountService implements UserDetailsService {
         javaMailSender.send(mailMessage);
     }
 
+    @Transactional(readOnly = true)
     public void login(Account account) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                 new UserAccount(account),
@@ -78,5 +79,11 @@ public class AccountService implements UserDetailsService {
 
         }
         return new UserAccount(account);
+    }
+
+    public void completeSignUp(Account account){
+        account.completeSignUp();
+        login(account);
+
     }
 }
