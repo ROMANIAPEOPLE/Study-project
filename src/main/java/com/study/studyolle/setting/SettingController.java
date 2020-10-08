@@ -70,4 +70,29 @@ public class SettingController {
         return "redirect:/settings/password";
     }
 
+
+    @GetMapping("/settings/notifications")
+    public String notificationsPage(@CurrentUser Account account, Model model){
+        model.addAttribute(new Notifications(account));
+        model.addAttribute(account);
+        return "settings/notifications";
+    }
+    @PostMapping("/settings/notifications")
+    public String notifications(@CurrentUser Account account, Model model, @Valid Notifications notifications,Errors errors, RedirectAttributes redirectAttributes){
+        if(errors.hasErrors()){
+            model.addAttribute(account);
+            return "settings/notifications";
+        }
+
+        accountService.updateNotifications(account,notifications);
+
+        redirectAttributes.addFlashAttribute("message", "정상적으로 변경되었습니다.");
+
+        return "redirect:/settings/notifications";
+
+
+    }
+
+
 }
+

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,13 +28,15 @@ class SettingControllerTest {
     @Autowired
     MockMvc mockMvc;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     @Autowired
     AccountRepository accountRepository;
 
 
     @AfterEach
-    void afterEach () {
+    void afterEach() {
         accountRepository.deleteAll();
     }
 
@@ -41,23 +44,23 @@ class SettingControllerTest {
     @WithAccount("jungkh405")
     @DisplayName("프로필 수정 - 입력값 정상")
     @Test
-    void updateProfile() throws Exception{
+    void updateProfile() throws Exception {
         mockMvc.perform(post("/settings/profile")
-        .param("bio", "짧은 소개를 수정하는 경우")
-        .with(csrf()))
+                .param("bio", "짧은 소개를 수정하는 경우")
+                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/settings/profile"))
                 .andExpect(flash().attributeExists("message"));
         Account kh = accountRepository.findByNickname("jungkh405");
-    assertEquals("짧은 소개를 수정하는 경우", kh.getBio());
+        assertEquals("짧은 소개를 수정하는 경우", kh.getBio());
     }
 
     @WithAccount("jungkh405")
     @DisplayName("프로필 수정 - 실패")
     @Test
-    void updateProfile_error() throws  Exception{
+    void updateProfile_error() throws Exception {
         mockMvc.perform(post("/settings/profile")
-                .param("bio","긴소개긴소개긴소개긴소개긴소긴소개긴소개긴소개긴소개긴소개긴소개긴소개긴소개긴소개긴소개긴소개긴소개")
+                .param("bio", "긴소개긴소개긴소개긴소개긴소긴소개긴소개긴소개긴소개긴소개긴소개긴소개긴소개긴소개긴소개긴소개긴소개")
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("settings/profile"))
@@ -68,4 +71,34 @@ class SettingControllerTest {
         assertNull(kh.getBio());
     }
 
+
+    @WithAccount("jungkh405")
+    @DisplayName("비밀번호 수정- 성공")
+    @Test
+    void updatePassword() throws Exception {
+
+        mockMvc.perform(post("/settings/password")
+                .param("newPassword", "17171771")
+                .param("newPasswordConfirm", "17171771")
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/settings/password"))
+                .andExpect(flash().attributeExists("message"));
+        Account kh = accountRepository.findByNickname("jungkh405");
+        assertTrue(passwordEncoder.matches("17171771",kh.getPassword()));
+    }
+
+    @WithAccount("jungkh405")
+    @DisplayName("비밀번호 수정 - 실패")
+    @Test
+    void updatePassword_fail() throws  Exception {
+        mockMvc.perform(post("/settings/password")
+                .param("newPassword", "17171771")
+                .param("newPasswordConfirm", "171717712")
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("settings/password"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().attributeExists("passwordForm"));
+    }
 }
