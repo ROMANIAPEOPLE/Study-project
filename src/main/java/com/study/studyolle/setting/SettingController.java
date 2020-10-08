@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -16,7 +18,11 @@ import javax.validation.Valid;
 @Controller
 @RequiredArgsConstructor
 public class SettingController {
-
+    //signUpForm이라는 데이터를 받을때 함께 실행된다.
+    @InitBinder("passwordForm")
+    public void initBinder(WebDataBinder webDataBinder){
+        webDataBinder.addValidators(new PasswordFormValidator());
+    }
 
     private final AccountService accountService;
 
@@ -42,6 +48,26 @@ public class SettingController {
         accountService.updateProfile(account,profile);
         attributes.addFlashAttribute("message", "회원정보 수정이 완료되었습니다.");
         return "redirect:/settings/profile";
+    }
+
+    @GetMapping("/settings/password")
+    public String updatePasswordForm(@CurrentUser Account account, Model model){
+        model.addAttribute(account);
+        model.addAttribute(new PasswordForm());
+        return "settings/password";
+    }
+
+    @PostMapping("/settings/password")
+    public String updatePassword(@CurrentUser Account account, @Valid PasswordForm passwordForm, Errors errors, Model model,RedirectAttributes redirectAttributes){
+        if(errors.hasErrors()){
+            model.addAttribute("account");
+            return "settings/password";
+        }
+
+        accountService.updatePassword(account, passwordForm.getNewPassword());
+        redirectAttributes.addFlashAttribute("message", "패스워드가 정상적으로 변경되었습니다.");
+
+        return "redirect:/settings/password";
     }
 
 }

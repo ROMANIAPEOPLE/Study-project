@@ -93,6 +93,13 @@ public class AccountService implements UserDetailsService {
         account.setOccupation(profile.getOccupation());
         account.setUrl(profile.getUrl());
         account.setLocation(profile.getLocation());
+        account.setProfileImage(profile.getProfileImage());
+        accountRepository.save(account);
+    }
+
+    public void updatePassword(Account account, String newPassword) {
+
+        account.setPassword(passwordEncoder.encode(newPassword));
         accountRepository.save(account);
     }
 }
