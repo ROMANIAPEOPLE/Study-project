@@ -4,6 +4,7 @@ import com.study.studyolle.domain.Account;
 import com.study.studyolle.setting.Notifications;
 import com.study.studyolle.setting.Profile;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,7 +27,7 @@ public class AccountService implements UserDetailsService {
     private final JavaMailSender javaMailSender;
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
-
+    private final ModelMapper modelMapper;
     //회원정보 저장 , 이메일 토큰 생성 및 이메일 전송
     @Transactional
     public Account processNewAccount(SignUpForm signUpForm) {
@@ -90,11 +91,7 @@ public class AccountService implements UserDetailsService {
     }
 
     public void updateProfile(Account account, Profile profile) {
-        account.setBio(profile.getBio());
-        account.setOccupation(profile.getOccupation());
-        account.setUrl(profile.getUrl());
-        account.setLocation(profile.getLocation());
-        account.setProfileImage(profile.getProfileImage());
+        modelMapper.map(profile,account);
         accountRepository.save(account);
     }
 
@@ -105,12 +102,7 @@ public class AccountService implements UserDetailsService {
     }
 
     public void updateNotifications(Account account, Notifications notifications) {
-        account.setStudyCreatedByEmail(notifications.isStudyCreatedByEmail());
-        account.setStudyCreatedByWeb(notifications.isStudyCreatedByWeb());
-        account.setStudyEnrollmentResultByEmail(notifications.isStudyEnrollmentResultByEmail());
-        account.setStudyEnrollmentResultByWeb(notifications.isStudyEnrollmentResultByWeb());
-        account.setStudyUpdatedByEmail(notifications.isStudyUpdatedByEmail());
-        account.setStudyUpdatedByWeb(notifications.isStudyUpdatedByWeb());
+        modelMapper.map(notifications,account);
         accountRepository.save(account);
     }
 }
