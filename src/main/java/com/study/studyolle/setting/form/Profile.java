@@ -1,4 +1,4 @@
-package com.study.studyolle.setting;
+package com.study.studyolle.setting.form;
 
 import com.study.studyolle.domain.Account;
 import lombok.Data;
