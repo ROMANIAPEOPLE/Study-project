@@ -112,4 +112,13 @@ public class AccountService implements UserDetailsService {
         accountRepository.save(account);
         login(account);
     }
+
+    public void sendLoginEmail(Account account) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(account.getEmail());
+        mailMessage.setSubject("스터디올래, 회원 가입 인증");
+        mailMessage.setText("/check-login-token?token=" + account.getEmailCheckToken()
+                +"&email=" + account.getEmail());
+        javaMailSender.send(mailMessage);
+    }
 }

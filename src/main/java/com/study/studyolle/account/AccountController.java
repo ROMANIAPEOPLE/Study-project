@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 
@@ -121,6 +122,38 @@ public class AccountController {
         // model.addAttribute("account",byNickname") 와 동일함.
         model.addAttribute("isOwner", byNickname.equals(account));
         return "account/profile";
+    }
+
+    @GetMapping("/email-login")
+    public String emailLoginPage(){
+        return "account/email-login";
+    }
+
+    @PostMapping("/email-login")
+    public String emailLoginSubmit(String email, Model model, RedirectAttributes redirectAttributes){
+        System.out.println("이메일:" + email);
+        Account account = accountRepository.findByEmail(email);
+        if(account == null) {
+            model.addAttribute("error", "존재하지 않는 이메일 입니다.");
+            return "account/check-login-email";
+        }
+
+        accountService.sendLoginEmail(account);
+        redirectAttributes.addFlashAttribute("message", "이메일이 전송되었습니다.");
+
+        return "redirect:/email-login";
+    }
+
+    @GetMapping("/check-login-token")
+    public String emailLoginSuccessOrFail(String token, String email, Model model){
+        System.out.println("이메일 넘어오나?" + email);
+        Account account = accountRepository.findByEmail(email);
+        if(account == null || !account.isValidToken(token)) {
+            model.addAttribute("error", "로그인 할 수 없습니다. 관리자에게 문의하세요.");
+                return "account/logged-in-by-email";
+        }
+        accountService.login(account);
+        return "account/logged-in-by-email";
     }
 
 
