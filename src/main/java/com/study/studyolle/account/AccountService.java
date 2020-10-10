@@ -1,6 +1,7 @@
 package com.study.studyolle.account;
 
 import com.study.studyolle.domain.Account;
+import com.study.studyolle.domain.Tag;
 import com.study.studyolle.setting.form.NicknameForm;
 import com.study.studyolle.setting.form.Notifications;
 import com.study.studyolle.setting.form.Profile;
@@ -20,6 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 @Transactional
 @Service
 @RequiredArgsConstructor
@@ -120,5 +124,21 @@ public class AccountService implements UserDetailsService {
         mailMessage.setText("/check-login-token?token=" + account.getEmailCheckToken()
                 +"&email=" + account.getEmail());
         javaMailSender.send(mailMessage);
+    }
+
+    public void addTag(Account account, Tag tag) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        byId.ifPresent(a -> a.getTags().add(tag));
+    }
+
+    public Set<Tag> getTag(Account account) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        return byId.orElseThrow().getTags();
+    }
+
+    public void removeTag(Account account, Tag tag) {
+        Optional<Account> byId = accountRepository.findById(account.getId());
+        byId.ifPresent(a ->a.getTags().remove(tag));
+
     }
 }

@@ -135,9 +135,15 @@ public class AccountController {
         Account account = accountRepository.findByEmail(email);
         if(account == null) {
             model.addAttribute("error", "존재하지 않는 이메일 입니다.");
-            return "account/check-login-email";
+            return "account/email-login";
         }
 
+
+        if(!account.canSendConfirmEmail()) {
+            model.addAttribute("error", "1시간 후에 시도해주세요.");
+            return "account/email-login";
+
+        }
         accountService.sendLoginEmail(account);
         redirectAttributes.addFlashAttribute("message", "이메일이 전송되었습니다.");
 
@@ -146,7 +152,7 @@ public class AccountController {
 
     @GetMapping("/check-login-token")
     public String emailLoginSuccessOrFail(String token, String email, Model model){
-        System.out.println("이메일 넘어오나?" + email);
+//        System.out.println("이메일 넘어오나?" + email);
         Account account = accountRepository.findByEmail(email);
         if(account == null || !account.isValidToken(token)) {
             model.addAttribute("error", "로그인 할 수 없습니다. 관리자에게 문의하세요.");

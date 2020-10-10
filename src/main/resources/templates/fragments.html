@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.min.css" />
-<!--    <link rel="stylesheet" href="/node_modules/@yaireo/tagify/dist/tagify.css">-->
+    <link rel="stylesheet" href="/node_modules/@yaireo/tagify/dist/tagify.css">
 <!--    <link rel="stylesheet" href="/node_modules/summernote/dist/summernote-bs4.min.css">-->
     <script src="/node_modules/jquery/dist/jquery.min.js"></script>
     <script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -363,7 +363,7 @@
                 },
                 contentType: "application/json; charset=utf-8",
                 method: "POST",
-                url: "/study/" + studyPath + "/settings/tags" + url,
+                url: "/settings/tags" + url,
                 data: JSON.stringify({'tagTitle': tagTitle})
             }).done(function (data, status) {
                 console.log("${data} and status is ${status}");
@@ -381,7 +381,6 @@
         var tagInput = document.querySelector("#tags");
         var tagify = new Tagify(tagInput, {
             pattern: /^.{0,20}$/,
-            whitelist: JSON.parse(document.querySelector("#whitelist").textContent),
             dropdown : {
                 enabled: 1, // suggest tags after a single character input
             } // map tags
@@ -426,7 +425,6 @@
             var tagInput = document.querySelector("#tags");
             var tagify = new Tagify(tagInput, {
                 pattern: /^.{0,20}$/,
-                whitelist: JSON.parse(document.querySelector("#whitelist").textContent),
                 dropdown : {
                     enabled: 1, // suggest tags after a single character input
                 } // map tags

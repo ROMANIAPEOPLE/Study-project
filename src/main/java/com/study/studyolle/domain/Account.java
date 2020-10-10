@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -55,6 +56,9 @@ public class Account {
     private boolean studyEnrollmentResultByWeb;
     private boolean studyUpdatedByEmail;
     private boolean studyUpdatedByWeb;
+
+    @ManyToMany
+    private Set<Tag> tags;
 
 
     //임의의 토큰 생성
