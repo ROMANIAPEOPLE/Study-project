@@ -167,6 +167,8 @@ public class SettingController {
         return ResponseEntity.ok().build();
     }
 
+    //테스트
+
     @PostMapping("/settings/tags/remove")
     @ResponseBody
     public ResponseEntity removeTag(@CurrentUser Account account, @RequestBody TagForm tagForm){
