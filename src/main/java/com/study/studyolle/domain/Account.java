@@ -51,14 +51,17 @@ public class Account {
 
     //알림
     private boolean studyCreatedByEmail;
-    private boolean studyCreatedByWeb;
+    private boolean studyCreatedByWeb = true;
     private boolean studyEnrollmentResultByEmail;
-    private boolean studyEnrollmentResultByWeb;
+    private boolean studyEnrollmentResultByWeb= true;
     private boolean studyUpdatedByEmail;
-    private boolean studyUpdatedByWeb;
+    private boolean studyUpdatedByWeb= true;
 
     @ManyToMany
     private Set<Tag> tags;
+
+    @ManyToMany
+    private Set<Zone> zones;
 
 
     //임의의 토큰 생성
